@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serverlessowa Aplikacja Suno AI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #4a90e2;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    section {
+      margin-bottom: 2rem;
+    }
+    h2 {
+      color: #4a90e2;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      line-height: 1.6;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .feature {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      background: #e1e8f0;
+    }
+    a.cta-button {
+      display: inline-block;
+      background: #4a90e2;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Serverlessowa Aplikacja Suno AI</h1>
+    <p>Generuj muzykę AI w kilka sekund!</p>
+  </header>
+  <main>
+    <section>
+      <h2>Co to jest?</h2>
+      <p>To lekka aplikacja oparta na funkcjach serverless (Vercel Functions), która łączy się z Suno AI API i umożliwia generowanie unikalnych utworów muzycznych na podstawie tekstowego opisu.</p>
+    </section>
+    <section>
+      <h2>Jak to działa?</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>1. Wywołanie API</h3>
+          <p>Prześlij zapytanie z promptem, stylem i tytułem utworu do endpointu <code>/api/generate-track</code>.</p>
+        </div>
+        <div class="feature">
+          <h3>2. Generowanie</h3>
+          <p>Suno AI przetwarza prompt i generuje muzykę zgodnie z podanymi parametrami.</p>
+        </div>
+        <div class="feature">
+          <h3>3. Callback</h3>
+          <p>Gdy utwór będzie gotowy, Suno wyśle dane zwrotne na endpoint <code>/api/suno-callback</code> z linkiem do pliku audio.</p>
+        </div>
+        <div class="feature">
+          <h3>4. Odtwarzanie</h3>
+          <p>Odbierz link do pliku MP3 i odtwórz go lub wyświetl w aplikacji.</p>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2>Dlaczego serverless?</h2>
+      <p>Dzięki serverless Functions na Vercel unikamy zarządzania serwerami. Skalujemy się automatycznie i płacimy tylko za wykorzystane zasoby.</p>
+      <a href="https://vercel.com" class="cta-button" target="_blank">Dowiedz się więcej o Vercel</a>
+    </section>
+  </main>
+  <footer>
+    &copy; Tak ten HTML został wygenerowany przez AI - w tym prostym projekcie chodzi o funkcje serverlessowe przede wszystkim.
+  </footer>
+</body>
+</html>
