@@ -151,6 +151,8 @@ res.setHeader("Access-Control-Allow-Origin", "*");
 
   console.log(req.body);
 
+  return res.status(200).json({ message: req.body });
+
   const { personName, additionalNotes = "", model, token } = req.body || {};
   if (!personName || typeof personName !== "string") {
     res.status(400).json({ error: "Missing 'personName' in request" });
@@ -161,7 +163,7 @@ res.setHeader("Access-Control-Allow-Origin", "*");
   if (model && typeof model === "string" && model.toLowerCase().includes("gpt")) {
     llm = new ChatOpenAI({ model: model, temperature: 0.3, apiKey: token });
   } else {
-    llm = new ChatDeepSeek({ model: model || "deepseek-reasoner", temperature: 0.3, apiKey: token });
+    llm = new ChatDeepSeek({ model: model || "deepseek-reasoner", temperature: 0.3, apiKey: "sk-7df0bde0720f4721a64fcccb91073a4f" });
   }
 
   try {
