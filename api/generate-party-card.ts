@@ -144,7 +144,7 @@ res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
 
-  if (req.method !== "POST") {
+  if (req.method == "POST") {
     res.status(405).json({ error: "Method Not Allowed" });
     return;
   }
