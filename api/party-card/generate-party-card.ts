@@ -1,9 +1,16 @@
-import { z } from 'zod';
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ChatOpenAI } from '@langchain/openai';
-import { ChatDeepSeek } from '@langchain/deepseek';
+import { z } from "zod";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatDeepSeek } from "@langchain/deepseek";
 
-const NamesFont = z.enum(["Oswald", "Noto Serif", "Aboreto", "Jost", "Kaushan", "Playfair"]);
+const NamesFont = z.enum([
+  "Oswald",
+  "Noto Serif",
+  "Aboreto",
+  "Jost",
+  "Kaushan",
+  "Playfair",
+]);
 
 const SingleText = z.object({ id: z.string(), content: z.string() });
 const ListTexts = z.array(SingleText);
@@ -126,7 +133,6 @@ const GeneratedJsonSchema = z.object({
   wishesSection: z.array(UnionWishElements),
 });
 
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -138,30 +144,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.end();
     return;
   }
+
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method Not Allowed" });
     return;
   }
 
-  const { personName, additionalNotes = "", model } = req.body || {};
+  const { personName, additionalNotes = "", model, token } = req.body || {};
   if (!personName || typeof personName !== "string") {
     res.status(400).json({ error: "Missing 'personName' in request" });
     return;
   }
 
   let llm;
-  if (model && typeof model === "string" && model.toLowerCase().includes("gpt")) {
-    llm = new ChatOpenAI({ model: model, temperature: 0.3 });
+  if (
+    model &&
+    typeof model === "string" &&
+    model.toLowerCase().includes("gpt")
+  ) {
+    llm = new ChatOpenAI({ model: model, temperature: 0.3, apiKey: token });
   } else {
-    llm = new ChatDeepSeek({ model: model || "deepseek-reasoner", temperature: 0.3 });
+    llm = new ChatDeepSeek({
+      model: model || "deepseek-reasoner",
+      temperature: 0.3,
+      apiKey: "sk-7df0bde0720f4721a64fcccb91073a4f",
+    });
   }
 
   try {
-    const systemPrompt = "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure.";
-    const userPrompt = `Name: "${personName}"` + (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
+    const systemPrompt =
+      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure.";
+    const userPrompt =
+      `Name: "${personName}"` +
+      (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
 
-    const structured = llm.withStructuredOutput(GeneratedJsonSchema, { name: "PartyCardResponse", method: "json_mode" });
-    const result = await structured.invoke(`${systemPrompt}\\n\\n${userPrompt}`);
+    const structured = llm.withStructuredOutput(GeneratedJsonSchema, {
+      name: "PartyCardResponse",
+      method: "json_mode",
+    });
+    const result = await structured.invoke(
+      `${systemPrompt}\\n\\n${userPrompt}`
+    );
 
     const output = GeneratedJsonSchema.parse(result);
     res.status(200).json(output);
