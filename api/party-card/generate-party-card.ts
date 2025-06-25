@@ -134,16 +134,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };
   if (req.method === "OPTIONS") {
-    res.writeHead(204, CORS_HEADERS);
+    res.writeHead(200, CORS_HEADERS);
     res.end();
     return;
   }
-  if (req.method !== "POST") {
+
+res.setHeader("Access-Control-Allow-Origin", "*"); 
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+
+  if (req.method == "POST") {
     res.status(405).json({ error: "Method Not Allowed" });
     return;
   }
 
-  const { personName, additionalNotes = "", model } = req.body || {};
+
+
+  const { personName, additionalNotes = "", model, token } = req.body || {};
   if (!personName || typeof personName !== "string") {
     res.status(400).json({ error: "Missing 'personName' in request" });
     return;
@@ -151,9 +159,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let llm;
   if (model && typeof model === "string" && model.toLowerCase().includes("gpt")) {
-    llm = new ChatOpenAI({ model: model, temperature: 0.3 });
+    llm = new ChatOpenAI({ model: model, temperature: 0.3, apiKey: token });
   } else {
-    llm = new ChatDeepSeek({ model: model || "deepseek-reasoner", temperature: 0.3 });
+    llm = new ChatDeepSeek({ model: model || "deepseek-reasoner", temperature: 0.3, apiKey: "sk-7df0bde0720f4721a64fcccb91073a4f" });
   }
 
   try {
