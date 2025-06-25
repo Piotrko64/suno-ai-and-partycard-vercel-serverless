@@ -143,6 +143,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+res.setHeader("Access-Control-Allow-Origin", "*"); 
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   const { personName, additionalNotes = "", model, token } = req.body || {};
   if (!personName || typeof personName !== "string") {
     res.status(400).json({ error: "Missing 'personName' in request" });
