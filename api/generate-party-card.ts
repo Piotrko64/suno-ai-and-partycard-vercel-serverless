@@ -138,14 +138,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.end();
     return;
   }
+
+res.setHeader("Access-Control-Allow-Origin", "*"); 
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method Not Allowed" });
     return;
   }
 
-res.setHeader("Access-Control-Allow-Origin", "*"); 
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  console.log(req.body);
 
   const { personName, additionalNotes = "", model, token } = req.body || {};
   if (!personName || typeof personName !== "string") {
