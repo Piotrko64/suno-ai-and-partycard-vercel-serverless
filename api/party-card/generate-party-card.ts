@@ -171,7 +171,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     llm = new ChatDeepSeek({
       model: model || "deepseek-reasoner",
       temperature: 0.3,
-      apiKey: "sk-7df0bde0720f4721a64fcccb91073a4f",
+      apiKey: token,
     });
   }
 
@@ -194,6 +194,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json(output);
   } catch (error) {
     console.error("Error generating JSON:", error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error", errorDetails: error });
   }
 }
