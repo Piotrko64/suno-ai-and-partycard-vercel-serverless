@@ -177,7 +177,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const systemPrompt =
-      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure.";
+      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure. Don't use fig or image sections";
     const userPrompt =
       `Name: "${personName}"` +
       (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
