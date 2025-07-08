@@ -21,14 +21,14 @@ const TagCloudType = z.object({
   id: z.string(),
   texts: ListTexts,
   color: z.string(),
-  font: NamesFont.default("Oswald"),
+  font: NamesFont.optional().default("Oswald"),
 });
 const WallWishType = z.object({
   name: z.literal("wishWall"),
   id: z.string(),
   texts: ListTexts,
   color: z.string(),
-  font: NamesFont.default("Oswald"),
+  font: NamesFont.optional().default("Oswald"),
 });
 const ImageURLType = z.object({
   name: z.literal("imageURL"),
@@ -50,7 +50,7 @@ const TextType = z.object({
   isFullWidth: z.boolean(),
   color: z.string(),
   backgroundColor: z.string(),
-  font: NamesFont.default("Oswald"),
+  font: NamesFont.optional().default("Oswald"),
   marginTop: z.number(),
   marginBottom: z.number(),
   isGradient: z.boolean(),
@@ -73,7 +73,7 @@ const HeaderSection = z.object({
     isGradient: z.boolean(),
     isStrokeColor: z.boolean(),
     strokeColor: z.string(),
-    font: NamesFont.default("Oswald"),
+    font: NamesFont.optional().default("Oswald"),
   }),
   supriseCard: z.object({
     isActive: z.boolean(),
@@ -81,26 +81,26 @@ const HeaderSection = z.object({
     text: z.string(),
     color: z.string(),
     backgroundColor: z.string(),
-    font: NamesFont.default("Oswald"),
+    font: NamesFont.optional().default("Oswald"),
   }),
   textAboveName: z.object({
     isActive: z.boolean(),
     text: z.string(),
     color: z.string(),
-    font: NamesFont.default("Oswald"),
+    font: NamesFont.optional().default("Oswald"),
     isGradient: z.boolean(),
   }),
   textUnderName: z.object({
     isActive: z.boolean(),
     text: z.string(),
     color: z.string(),
-    font: NamesFont.default("Oswald"),
+    font: NamesFont.optional().default("Oswald"),
     isGradient: z.boolean(),
   }),
   gif: z.object({ isShow: z.boolean(), url: z.string() }),
   endText: z.object({
     isActive: z.boolean(),
-    font: NamesFont.default("Oswald"),
+    font: NamesFont.optional().default("Oswald"),
     text: z.string(),
     color: z.string(),
   }),
@@ -207,8 +207,13 @@ const examples = [
           isFireworks: true,
           intensity: 8.3
         },
+        music: {
+          isMusic: false,
+          volume: 20,
+          url: ""
+        }
       },
-      wishesSection: [] 
+      wishesSection: [] // Można rozszerzyć
     }, null, 2)
   }
 ];
@@ -221,9 +226,7 @@ const examplePrompt = new PromptTemplate({
 const fewShotPrompt = new FewShotPromptTemplate({
   examples,
   examplePrompt,
-  prefix: `You are an assistant that generates valid JSON output for party cards.
-Only use the following values for wishesSection.name: "tagCloud", "wishWall", "imageURL", "gif", "text".
-Never invent other names. Always match the schema strictly.`,
+  prefix: `You are an assistant that generates valid JSON output for party cards. Only return valid JSON. Never return null fonts.`,
   suffix: `Name: {name}\nNotes: {notes}\n\nOutput JSON:\n`,
   inputVariables: ["name", "notes"]
 });
@@ -271,10 +274,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const systemPrompt =
+      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure. Don't use fig or image sections. Never use null for font fields. Always use a valid font from the following: Oswald, Noto Serif, Aboreto, Jost, Kaushan, Playfair.";
+    const userPrompt =
+      `Name: "${personName}"` +
+      (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
 
-  const structured = llm.withStructuredOutput(GeneratedJsonSchema);
-    const prompt = await fewShotPrompt.format({ name: personName, notes: additionalNotes });
-    const result = await structured.invoke(prompt);
+    const structured = llm.withStructuredOutput(GeneratedJsonSchema, {
+      name: "PartyCardResponse",
+      method: "json_mode",
+    });
+    const result = await structured.invoke(
+      `${systemPrompt}\\n\\n${userPrompt}`
+    );
+
     const output = GeneratedJsonSchema.parse(result);
     res.status(200).json(output);
   } catch (error) {
