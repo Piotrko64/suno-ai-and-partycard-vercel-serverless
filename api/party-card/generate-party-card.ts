@@ -275,7 +275,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const systemPrompt =
-      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure. Don't use fig or image sections. Never use null for font fields. Always use a valid font from the following: Oswald, Noto Serif, Aboreto, Jost, Kaushan, Playfair.";
+      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure. Don't use fig or image sections. Never use null for font fields. Always use a valid font from the following: Oswald, Noto Serif, Aboreto, Jost, Kaushan, Playfair. Only use the following values for wishesSection.name: 'tagCloud', 'wishWall', 'imageURL', 'gif', 'text'. Never invent other names. Always match the schema strictly.";
     const userPrompt =
       `Name: "${personName}"` +
       (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
