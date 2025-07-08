@@ -213,14 +213,14 @@ const examples = [
           url: ""
         }
       },
-      wishesSection: [] // Można rozszerzyć
+      wishesSection: []
     }, null, 2)
   }
 ];
 
 const examplePrompt = new PromptTemplate({
   template: `Name: {name}\nNotes: {notes}\n\nOutput JSON:\n{output}`,
-  inputVariables: ["name", "notes", "output"]
+  inputVariables: ["name", "notes"]
 });
 
 const fewShotPrompt = new FewShotPromptTemplate({
