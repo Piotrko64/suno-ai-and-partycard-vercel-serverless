@@ -221,7 +221,9 @@ const examplePrompt = new PromptTemplate({
 const fewShotPrompt = new FewShotPromptTemplate({
   examples,
   examplePrompt,
-  prefix: `You are an assistant that generates valid JSON output for party cards. Only return valid JSON. Never return null fonts.`,
+  prefix: `You are an assistant that generates valid JSON output for party cards.
+Only use the following values for wishesSection.name: "tagCloud", "wishWall", "imageURL", "gif", "text".
+Never invent other names. Always match the schema strictly.`,
   suffix: `Name: {name}\nNotes: {notes}\n\nOutput JSON:\n`,
   inputVariables: ["name", "notes"]
 });
