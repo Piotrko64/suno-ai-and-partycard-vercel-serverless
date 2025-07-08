@@ -1,33 +1,15 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { handleCorsOption } from "../utils/handle-cors-options";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  
   const CALLBACK_URL = process.env.SUNO_CALLBACK_URL;
-  
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
 
- if (req.method === "OPTIONS") {
-    res.writeHead(204, CORS_HEADERS);
-    res.end();
-    return;
-  }
-
-
-res.setHeader("Access-Control-Allow-Origin", "*"); 
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Only POST requests allowed' });
-  }
-
+  await handleCorsOption(req, res);
 
   if (!CALLBACK_URL) {
-    return res.status(500).json({ error: "Callback URL not configured in env." });
+    return res
+      .status(500)
+      .json({ error: "Callback URL not configured in env." });
   }
 
   const {
@@ -37,7 +19,7 @@ res.setHeader("Access-Control-Allow-Origin", "*");
     instrumental = true,
     model = "V3_5",
     negativeTags = "Heavy Metal, Upbeat Drums",
-    token
+    token,
   } = req.body;
 
   if (!token) {
@@ -48,9 +30,9 @@ res.setHeader("Access-Control-Allow-Origin", "*");
     const response = await fetch("https://apibox.erweima.ai/api/v1/generate", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-        "Accept": "application/json"
+        Accept: "application/json",
       },
       body: JSON.stringify({
         prompt,
@@ -60,13 +42,12 @@ res.setHeader("Access-Control-Allow-Origin", "*");
         instrumental,
         model,
         negativeTags,
-        callBackUrl: CALLBACK_URL
-      })
+        callBackUrl: CALLBACK_URL,
+      }),
     });
 
     const result = await response.json();
     return res.status(200).json(result);
-
   } catch (error) {
     console.error("❌ Something go wrong:", error);
     return res.status(500).json({ error: "Internal server error." });
