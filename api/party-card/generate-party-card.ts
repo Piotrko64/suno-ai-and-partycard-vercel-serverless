@@ -286,6 +286,7 @@ Follow these strict rules when generating the JSON:
 6. By default, prefer dark background colors (e.g. black, navy, dark purple).
 7. Be creative and vary fonts and messages to make the card feel unique and festive.
 8. Always follow the exact structure and field names defined by the schema.
+9. Don't repeat yourself
 `;
     const userPrompt =
       `Name: "${personName}"` +
@@ -295,9 +296,13 @@ Follow these strict rules when generating the JSON:
       name: "PartyCardResponse",
       method: "json_mode",
     });
-    const result = await structured.invoke(
-      `${systemPrompt}\\n\\n${userPrompt}`
-    );
+
+const promptWithExamples = await fewShotPrompt.format({
+  name: personName,
+  notes: additionalNotes || "",
+});
+
+   const result = await structured.invoke(`${systemPrompt}\n\n${promptWithExamples}`);
 
     const output = GeneratedJsonSchema.parse(result);
     res.status(200).json(output);
