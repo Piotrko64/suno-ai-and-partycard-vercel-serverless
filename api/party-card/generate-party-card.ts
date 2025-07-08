@@ -219,7 +219,7 @@ const examples = [
 ];
 
 const examplePrompt = new PromptTemplate({
-  template: `Name: {name}\nNotes: {notes}\n\nOutput JSON:\n{output}`,
+  template: `Name: {name}\nNotes: {notes}\n`,
   inputVariables: ["name", "notes"]
 });
 
