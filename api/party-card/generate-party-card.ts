@@ -302,6 +302,12 @@ const promptWithExamples = await fewShotPrompt.format({
   notes: additionalNotes || "",
 });
 
+
+if (!personName || typeof personName !== "string") {
+  res.status(400).json({ error: "Missing 'personName' in request", personName, additionalNotes });
+  return;
+}
+
    const result = await structured.invoke(`${systemPrompt}\n\n${promptWithExamples}`);
 
     const output = GeneratedJsonSchema.parse(result);
