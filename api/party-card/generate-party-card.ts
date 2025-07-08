@@ -134,102 +134,6 @@ const GeneratedJsonSchema = z.object({
   wishesSection: z.array(UnionWishElements),
 });
 
-const examples = [
-  {
-    input: {
-      name: "Victoria",
-      notes: "Birthday card with colorful style and positive energy."
-    },
-    output: JSON.stringify({
-      idAuthor: "viki",
-      nameAuthor: "Victoria",
-      date: "2024-06-01",
-      headerSection: {
-        isActive: true,
-        name: {
-          isActive: false,
-          text: "Victoria",
-          color: "linear-gradient(110deg, #ff0000 0%, #bc10e7 50%, #5e92d0 100%)",
-          isGradient: true,
-          isStrokeColor: true,
-          strokeColor: "#fff",
-          font: "Oswald"
-        },
-        supriseCard: {
-          isActive: false,
-          isShowCard: true,
-          text: "",
-          color: "blue",
-          backgroundColor: "red",
-          font: "Oswald"
-        },
-        textAboveName: {
-          isActive: true,
-          text: "Happy Birthday",
-          color: "white",
-          font: "Aboreto",
-          isGradient: false
-        },
-        textUnderName: {
-          isActive: true,
-          text: " ❤️ ❤️ ❤️",
-          color: "white",
-          font: "Noto Serif",
-          isGradient: false
-        },
-        gif: { isShow: false, url: "" },
-        endText: {
-          isActive: true,
-          font: "Aboreto",
-          text: "⬇️⬇️ I wish you... ⬇️⬇️",
-          color: "#fff",
-          isGradient: false
-        }
-      },
-      backgroundSection: {
-        background: {
-          color: "#07090e",
-          isGradient: false
-        },
-        confetti: {
-          onStart: true,
-          buttonConfetti: true,
-          amountConfetti: 1083.2,
-          isActive: true
-        },
-        backgroundDecorations: {
-          isDecorations: true,
-          kindDecorations: "heart",
-          color: "#cb4141",
-          isGradient: false
-        },
-        fireworks: {
-          isFireworks: true,
-          intensity: 8.3
-        },
-        music: {
-          isMusic: false,
-          volume: 20,
-          url: ""
-        }
-      },
-      wishesSection: []
-    }, null, 2)
-  }
-];
-
-const examplePrompt = new PromptTemplate({
-  template: `Name: {name}\nNotes: {notes}\n`,
-  inputVariables: ["name", "notes"]
-});
-
-const fewShotPrompt = new FewShotPromptTemplate({
-  examples,
-  examplePrompt,
-  prefix: `You are an assistant that generates valid JSON output for party cards. Only return valid JSON. Never return null fonts.`,
-  suffix: `Name: {name}\nNotes: {notes}\n\nOutput JSON:\n`,
-  inputVariables: ["name", "notes"]
-});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const CORS_HEADERS = {
@@ -297,18 +201,10 @@ Follow these strict rules when generating the JSON:
       method: "json_mode",
     });
 
-const promptWithExamples = await fewShotPrompt.format({
-  name: personName,
-  notes: additionalNotes || "",
-});
 
-
-if (!personName || typeof personName !== "string") {
-  res.status(400).json({ error: "Missing 'personName' in request", personName, additionalNotes });
-  return;
-}
-
-   const result = await structured.invoke(`${systemPrompt}\n\n${promptWithExamples}`);
+    const result = await structured.invoke(
+      `${systemPrompt}\\n\\n${userPrompt}`
+    );
 
     const output = GeneratedJsonSchema.parse(result);
     res.status(200).json(output);
