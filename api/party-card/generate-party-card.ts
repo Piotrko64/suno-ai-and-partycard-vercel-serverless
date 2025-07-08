@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatDeepSeek } from "@langchain/deepseek";
+import { FewShotPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 
 const NamesFont = z.enum([
   "Oswald",
@@ -133,6 +134,98 @@ const GeneratedJsonSchema = z.object({
   wishesSection: z.array(UnionWishElements),
 });
 
+const examples = [
+  {
+    input: {
+      name: "Victoria",
+      notes: "Birthday card with colorful style and positive energy."
+    },
+    output: JSON.stringify({
+      idAuthor: "viki",
+      nameAuthor: "Victoria",
+      date: "2024-06-01",
+      headerSection: {
+        isActive: true,
+        name: {
+          isActive: false,
+          text: "Victoria",
+          color: "linear-gradient(110deg, #ff0000 0%, #bc10e7 50%, #5e92d0 100%)",
+          isGradient: true,
+          isStrokeColor: true,
+          strokeColor: "#fff",
+          font: "Oswald"
+        },
+        supriseCard: {
+          isActive: false,
+          isShowCard: true,
+          text: "",
+          color: "blue",
+          backgroundColor: "red",
+          font: "Oswald"
+        },
+        textAboveName: {
+          isActive: true,
+          text: "Happy Birthday",
+          color: "white",
+          font: "Aboreto",
+          isGradient: false
+        },
+        textUnderName: {
+          isActive: true,
+          text: " ❤️ ❤️ ❤️",
+          color: "white",
+          font: "Noto Serif",
+          isGradient: false
+        },
+        gif: { isShow: false, url: "" },
+        endText: {
+          isActive: true,
+          font: "Aboreto",
+          text: "⬇️⬇️ I wish you... ⬇️⬇️",
+          color: "#fff",
+          isGradient: false
+        }
+      },
+      backgroundSection: {
+        background: {
+          color: "#07090e",
+          isGradient: false
+        },
+        confetti: {
+          onStart: true,
+          buttonConfetti: true,
+          amountConfetti: 1083.2,
+          isActive: true
+        },
+        backgroundDecorations: {
+          isDecorations: true,
+          kindDecorations: "heart",
+          color: "#cb4141",
+          isGradient: false
+        },
+        fireworks: {
+          isFireworks: true,
+          intensity: 8.3
+        },
+      },
+      wishesSection: [] 
+    }, null, 2)
+  }
+];
+
+const examplePrompt = new PromptTemplate({
+  template: `Name: {name}\nNotes: {notes}\n\nOutput JSON:\n{output}`,
+  inputVariables: ["name", "notes", "output"]
+});
+
+const fewShotPrompt = new FewShotPromptTemplate({
+  examples,
+  examplePrompt,
+  prefix: `You are an assistant that generates valid JSON output for party cards. Only return valid JSON. Never return null fonts.`,
+  suffix: `Name: {name}\nNotes: {notes}\n\nOutput JSON:\n`,
+  inputVariables: ["name", "notes"]
+});
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -176,20 +269,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const systemPrompt =
-      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure. Don't use fig or image sections";
-    const userPrompt =
-      `Name: "${personName}"` +
-      (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
 
-    const structured = llm.withStructuredOutput(GeneratedJsonSchema, {
-      name: "PartyCardResponse",
-      method: "json_mode",
-    });
-    const result = await structured.invoke(
-      `${systemPrompt}\\n\\n${userPrompt}`
-    );
-
+  const structured = llm.withStructuredOutput(GeneratedJsonSchema);
+    const prompt = await fewShotPrompt.format({ name: personName, notes: additionalNotes });
+    const result = await structured.invoke(prompt);
     const output = GeneratedJsonSchema.parse(result);
     res.status(200).json(output);
   } catch (error) {
