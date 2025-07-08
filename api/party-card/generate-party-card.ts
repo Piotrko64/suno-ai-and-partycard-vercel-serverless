@@ -275,7 +275,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const systemPrompt =
-      "You are an assistant that generates JSON data for a party card builder application. Only return valid JSON matching the specified structure. Don't use fig or image sections. Never use null for font fields. Always use a valid font from the following: Oswald, Noto Serif, Aboreto, Jost, Kaushan, Playfair. Only use the following values for wishesSection.name: 'tagCloud', 'wishWall', 'imageURL', 'gif', 'text'. Never invent other names. Always match the schema strictly.";
+     `You are an assistant that generates valid JSON output for party cards based on the provided name and notes.
+Follow these strict rules when generating the JSON:
+
+1. For the wishesSection array, the "name" field must be exactly one of the following: "tagCloud", "wishWall", "imageURL", "gif", "text".
+2. Do NOT invent other values for "name". If the content is a simple message, use "text".
+3. Do NOT use "imageURL" or "gif" sections at all.
+4. Do NOT use the "supriseCard" unless explicitly requested in the notes.
+5. Ensure proper contrast between background and text colors for good readability (light text on dark backgrounds, or vice versa).
+6. By default, prefer dark background colors (e.g. black, navy, dark purple).
+7. Be creative and vary fonts and messages to make the card feel unique and festive.
+8. Always follow the exact structure and field names defined by the schema.
+`;
     const userPrompt =
       `Name: "${personName}"` +
       (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
