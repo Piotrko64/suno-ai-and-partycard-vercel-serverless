@@ -1,4 +1,3 @@
-
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatDeepSeek } from "@langchain/deepseek";
@@ -6,9 +5,7 @@ import { GeneratedJsonSchema } from "../../types/party-card/generate-card";
 import { handleCorsOption } from "../../utils/handle-cors-options";
 import { victoriaExampleCard } from "../../data/party-card/victoria-example-card";
 
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  
   await handleCorsOption(req, res);
 
   const { personName, additionalNotes = "", model, token } = req.body || {};
@@ -32,11 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-
-
   try {
-    const systemPrompt =
-     `You are an assistant that generates valid JSON output for party cards based on the provided name and notes.
+    const systemPrompt = `You are an assistant that generates valid JSON output for party cards based on the provided name and notes.
 Follow these strict rules when generating the JSON:
 
 1. For the wishesSection array, the "name" field must be exactly one of the following: "tagCloud", "wishWall", "imageURL", "gif", "text".
@@ -49,18 +43,18 @@ Follow these strict rules when generating the JSON:
 8. Always follow the exact structure and field names defined by the schema.
 9. Don't repeat yourself
 10. If you don't want to specify a font, omit the field entirely. Never use null.
+11. Use Polish or English language for all text fields, depending on the user context.
 
 This is JSON example: ${JSON.stringify(victoriaExampleCard)}
 `;
     const userPrompt =
       `Name: "${personName}"` +
-      (additionalNotes ? `\\nExtra context: ${additionalNotes}` : "");
+      (additionalNotes ? `\\n user context: ${additionalNotes}` : "");
 
     const structured = llm.withStructuredOutput(GeneratedJsonSchema, {
       name: "PartyCardResponse",
       method: "json_mode",
     });
-
 
     const result = await structured.invoke(
       `${systemPrompt}\\n\\n${userPrompt}`
